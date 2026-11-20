@@ -1,6 +1,7 @@
 import data
 import build_data
 import unittest
+import hw3
 
 
 # These two values are defined to support testing below. The
@@ -180,19 +181,88 @@ class TestCases(unittest.TestCase):
 
     # Part 1
     # test population_total
+    def test_empty_population(self):
+        self.assertEqual(0,hw3.population_total([]))
+    def test_county_population(self):
+        self.assertEqual(hw3.population_total(full_data),318857056)
 
     # Part 2
     # test filter_by_state
+    def test_filter_by_state_reduced_CA(self):
+        result=hw3.filter_by_state(reduced_data,"CA")
+        self.assertEqual(len(result),2)
+        for county in result:
+            self.assertEqual(county.state,"CA")
+
+    def test_filter_by_state_AL(self):
+        result = hw3.filter_by_state(reduced_data, 'AL')
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].county, 'Autauga County')
+
+    def test_filter_by_state_absent(self):
+        result = hw3.filter_by_state(reduced_data, 'ZZ')
+        self.assertEqual(result, [])
+
 
     # Part 3
     # test population_by_education
     # test population_by_ethnicity
     # test population_below_poverty_level
+    def test_population_by_education_single_county(self):
+        single_county=[reduced_data[2]]
+        result = hw3.population_by_education(single_county, "Bachelor's Degree or Higher")
+        self.assertAlmostEqual(result,87911.145)
+
+    def test_population_by_education_invalid(self):
+        result = hw3.population_by_education(reduced_data, "maxPHD")
+        self.assertAlmostEqual(result, 0)
+
+    def test_population_by_ethnicity_invalid(self):
+        result = hw3.population_by_ethnicity(reduced_data, "100 races")
+        self.assertAlmostEqual(result, 0)
+
+    def test_population_by_ethnicity_multiple_counties(self):
+        result = hw3.population_by_ethnicity(reduced_data, "Hispanic or Latino")
+        self.assertAlmostEqual(result, 136377.667, places=3)
+
+    def test_population_below_poverty_level_single(self):
+        single_county_list = [reduced_data[0]]
+        result = hw3.population_below_poverty_level(single_county_list)
+        self.assertAlmostEqual(result, 6702.795)
+
+    def test_below_poverty_level_less_than_more(self):
+        result = hw3.population_below_poverty_level(reduced_data)
+        self.assertAlmostEqual(result, 107711.714)
+
+
 
     # Part 4
     # test percent_by_education
     # test percent_by_ethnicity
     # test percent_below_poverty_level
+    def test_percent_by_education_invalid(self):
+        result = hw3.percent_by_education(reduced_data, "PhDDD")
+        self.assertEqual(result, 0)
+
+    def test_percent_by_education_multiple_counties(self):
+        result = hw3.percent_by_education(reduced_data, "Bachelor's Degree or Higher")
+        self.assertAlmostEqual(result, 29.7515, places=3)
+
+    def test_percent_by_ethnicity(self):
+        result = hw3.percent_by_ethnicity(reduced_data, "Hispanic or Latino")
+        self.assertAlmostEqual(result, 20.795, places=3)
+
+    def test_percent_by_ethnicity_invalid(self):
+        result = hw3.percent_by_ethnicity(reduced_data, "100 races")
+        self.assertAlmostEqual(result, 0)
+
+    def test_percent_below_poverty_level(self):
+        result = hw3.percent_below_poverty_level(reduced_data)
+        self.assertAlmostEqual(result, 16.424, places=3)
+
+    def test_percent_below_poverty_level_empty_list(self):
+        result = hw3.percent_below_poverty_level([])
+        self.assertEqual(result, 0)
 
     # Part 5
     # test education_greater_than
@@ -201,6 +271,67 @@ class TestCases(unittest.TestCase):
     # test ethnicity_less_than
     # test below_poverty_level_greater_than
     # test below_poverty_level_less_than
+
+    def test_education_greater_than(self):
+        result = hw3.education_greater_than(reduced_data, "Bachelor's Degree or Higher", 30.0)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].county, 'San Luis Obispo County')
+        self.assertEqual(result[1].county, 'Yolo County')
+
+    def test_empty_education_greater_thah(self):
+        result_empty = hw3.education_greater_than([], "Bachelor's Degree or Higher", 50.0)
+        self.assertEqual(len(result_empty), 0)
+
+    def test_education_less_than(self):
+        result = hw3.education_less_than(reduced_data, "Bachelor's Degree or Higher", 17.2)
+        self.assertEqual(len(result), 2)
+
+    def test_no_fit_education_less_thah(self):
+        result_empty = hw3.education_greater_than([], "Bachelor's Degree or Higher", -9999)
+        self.assertEqual(len(result_empty), 0)
+
+    def test_ethnicity_greater_than(self):
+        result = hw3.ethnicity_greater_than(reduced_data, "Hispanic or Latino", 22.0)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].county, 'Yolo County')
+
+    def test_empty_ethnicity_greater_thah(self):
+        result_empty = hw3.education_greater_than([], "White", 99990)
+        self.assertEqual(len(result_empty), 0)
+
+    def test_ethnicity_less_than(self):
+        result = hw3.ethnicity_less_than(reduced_data, "Hispanic or Latino", 4.2)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].county, 'Autauga County')
+
+    def test_no_fit_ethnicity_less_thah(self):
+        result_empty = hw3.education_greater_than([], "Asian", 0)
+        self.assertEqual(len(result_empty), 0)
+
+    def test_below_poverty_level_greater_than(self):
+        result = hw3.below_poverty_level_greater_than(reduced_data, 14.3)
+        self.assertEqual(len(result), 4)
+
+    def test_below_poverty_level_greater_than_empty(self):
+        result = hw3.below_poverty_level_greater_than([], 14.3)
+        self.assertEqual([], result)
+
+    def test_below_poverty_level_less_than(self):
+        result = hw3.below_poverty_level_less_than(reduced_data, 12.1)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].county, 'Weston County')
+
+    def test_below_poverty_level_less_than_empty(self):
+        result = hw3.below_poverty_level_less_than(reduced_data, -9999)
+        self.assertEqual([], result)
+
+
+
+
+
+
+
+
 
 
 

@@ -102,4 +102,4 @@ def below_poverty_level_less_than(counties: list[CountyDemographics], threshold:
     for county in counties:
         if county.income["Persons Below Poverty Level"] < threshold:
             result.append(county)
-    return resul
+    return result
